@@ -9,6 +9,8 @@
 # variables (feature extraction) if the problem needs it.
 #
 
+#Shift + cmd + c
+setwd("/Users/JaviFerrando/Desktop/MVA-Project")
 
 heart_disease = read.csv("data/heart.csv")
 
