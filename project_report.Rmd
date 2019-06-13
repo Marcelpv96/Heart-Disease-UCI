@@ -41,11 +41,14 @@ setwd("/Users/JaviFerrando/Desktop/MVA-Project")
 
 ```{r}
 heart_disease = read.csv("data/heart.csv")
+columns <- colnames(heart_disease)
+columns[1] <- "age"
+colnames(heart_disease) <- columns
 
 # Find missing variables
 which(is.na(heart_disease))
 
-head(heart_disease)
+kable(head(heart_disease))
 describe(heart_disease)
 
 ```
@@ -78,7 +81,7 @@ plot(density(outlier.scores),main='Distribution of individuals local outlier fac
 ```{r}
 #Exploratory Data Analysis
 #Density of heart presence/absence disease by age
-g1 <- ggplot(data=heart_disease, aes(x=X...age, fill=as.factor(target)))+
+g1 <- ggplot(data=heart_disease, aes(x=age, fill=as.factor(target)))+
   geom_density(alpha=.5)+
   ggtitle("Age") +
   scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
@@ -218,4 +221,116 @@ plot(indexes_after, type = "o", xlab = 'Number of classes', ylab = 'Calinski ind
 , main = 'Index after consolidation', col = 'blue', xaxt
 = "n")
 axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))  
+```
+
+```{r}
+first_factorial <- proj_indiv
+df <- data.frame(first_factorial, Class = as.factor(k_mean$cluster))
+catdes(df, num.var = length(df), proba = 0.05, row.w = NULL)
+```
+
+```{r}
+factor_heart$disease[factor_heart$target==0] <- "Yes"
+factor_heart$disease[factor_heart$target==1] <- "No"
+factor_heart$target <- NULL
+
+factor_heart2 <- factor_heart
+factor_heart2$age<-cut(factor_heart2$age, seq(0,80,10), right=FALSE)
+factor_heart2$age <- paste("Age", factor_heart2$age, sep="_")
+min(factor_heart2$oldpeak)
+factor_heart2$oldpeak<-cut(factor_heart2$oldpeak, seq(0,7,1), right=FALSE)
+factor_heart2$oldpeak <- paste("Oldp", factor_heart2$oldpeak, sep="_")
+factor_heart2$thalach<-cut(factor_heart2$thalach, seq(70,220,20), right=FALSE)
+factor_heart2$thalach <- paste("thalach", factor_heart2$thalach, sep="_")
+factor_heart2$trestbps<-cut(factor_heart2$trestbps, seq(80,220,20), right=FALSE)
+factor_heart2$trestbps <- paste("thres", factor_heart2$trestbps, sep="_")
+factor_heart2$chol<-cut(factor_heart2$chol, seq(100,600,100), right=FALSE)
+factor_heart2$chol <- paste("Col", factor_heart2$chol, sep="_")
+#factor_heart2$age <- NULL
+kable(head(factor_heart2))
+
+mcaHeart <- MCA(factor_heart2,ncp=7,
+               #quanti.sup=c(10),
+               quali.sup=c(14),
+               excl=NULL,
+               graph = FALSE,
+               level.ventil = 0.00,
+               axes = c(1,2),
+               row.w = NULL,
+               method="Indicator",
+               na.method="NA",
+               tab.disj=NULL)
+
+# mcaHeart <- MCA(factor_heart,ncp=7,
+#                quanti.sup=c(1,4,5,8,10),
+#                quali.sup=c(14),
+#                excl=NULL,
+#                graph = FALSE,
+#                level.ventil = 0.00,
+#                axes = c(1,2),
+#                row.w = NULL,
+#                method="Indicator",
+#                na.method="NA",
+#                tab.disj=NULL)
+summary(mcaHeart)
+```
+
+```{r,echo=FALSE}
+#Advanced visualizations
+par(mfrow=c(1,2))
+
+fviz_mca_ind(mcaHeart,
+             axes = c(1, 2),
+             geom="point",
+             col.ind = "cos2",
+             label="none", habillage=c(14),
+             addEllipses=TRUE, ellipse.level=0.95,
+             title = 'Individuals - MCA')
+```
+
+```{r,echo=FALSE}
+par(mfrow=c(1,2))
+
+fviz_mca_var(mcaHeart,
+             axes = c(1, 2),
+             choice=c("var.cat"), #Plot only variables
+             label = "var",
+             shape.var = 15,#Shape of the points
+             geom=c("point","text"),
+             select.var = list(cos2=15),
+             repel=T,
+             title = "Categories - MCA")
+
+fviz_mca_var(mcaHeart,
+             axes = c(1, 2),
+             choice=c("var"), #Plot only variables
+             shape.var = 15,#Shape of the points
+             geom=c("point","text"),
+             repel=T,
+             title = "Variables - MCA")
+```
+
+
+```{r,echo=FALSE}
+fviz_mca_biplot(mcaHeart,
+                axes = c(1, 2),
+                choice=c("var.cat"),
+                #geom = c("point", "text"),
+                geom.ind = "point",
+                geom.var = "text",
+                repel = TRUE,
+                label = "var",
+                invisible = "none",
+                habillage = c(14),
+                addEllipses = FALSE,
+                palette = NULL,
+                select.var = list(cos2=10),
+                arrows = c(FALSE, FALSE),
+                map = "symmetric",
+                title = "MCA - Biplot")
+```
+
+
+```{r,echo=FALSE}
+fviz_screeplot(mcaHeart, addlabels = FALSE)
 ```

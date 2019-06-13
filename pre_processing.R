@@ -25,11 +25,13 @@ library(adegraphics)
 library(fpc)
 library(cluster)
 
-
 DataExplorer#Shift + cmd + c
 setwd("/Users/JaviFerrando/Desktop/MVA-Project")
 
 heart_disease = read.csv("data/heart.csv")
+columns <- colnames(heart_disease)
+columns[1] <- "age"
+colnames(heart_disease) <- columns
 
 # Find missing variables
 which(is.na(heart_disease))
@@ -76,7 +78,7 @@ plot(density(outlier.scores),main='Distribution of individuals local outlier fac
 
 #Exploratory Data Analysis
 #Density of heart presence/absence disease by age
-g1 <- ggplot(data=heart_disease, aes(x=X...age, fill=as.factor(target)))+
+g1 <- ggplot(data=heart_disease, aes(x=age, fill=as.factor(target)))+
   geom_density(alpha=.5)+
   ggtitle("Age") +
   scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
@@ -218,6 +220,9 @@ plot(indexes_after, type = "o", xlab = 'Number of classes', ylab = 'Calinsky ind
      , main = 'Index after consolidation', col = 'firebrick1', xaxt
      = "n")
 axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))  
+
+#Multiple Correspondence Analysis
+
 
 
 

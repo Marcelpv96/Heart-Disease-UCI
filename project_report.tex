@@ -69,6 +69,7 @@
 \newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
 \newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
 \newcommand{\NormalTok}[1]{#1}
+\usepackage{longtable,booktabs}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -165,6 +166,9 @@
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{heart_disease =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/heart.csv"}\NormalTok{)}
+\NormalTok{columns <-}\StringTok{ }\KeywordTok{colnames}\NormalTok{(heart_disease)}
+\NormalTok{columns[}\DecValTok{1}\NormalTok{] <-}\StringTok{ "age"}
+\KeywordTok{colnames}\NormalTok{(heart_disease) <-}\StringTok{ }\NormalTok{columns}
 
 \CommentTok{# Find missing variables}
 \KeywordTok{which}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(heart_disease))}
@@ -177,26 +181,30 @@
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{head}\NormalTok{(heart_disease)}
+\KeywordTok{kable}\NormalTok{(}\KeywordTok{head}\NormalTok{(heart_disease))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-##   X...age sex cp trestbps chol fbs restecg thalach exang oldpeak slope ca
-## 1      63   1  3      145  233   1       0     150     0     2.3     0  0
-## 2      37   1  2      130  250   0       1     187     0     3.5     0  0
-## 3      41   0  1      130  204   0       0     172     0     1.4     2  0
-## 4      56   1  1      120  236   0       1     178     0     0.8     2  0
-## 5      57   0  0      120  354   0       1     163     1     0.6     2  0
-## 6      57   1  0      140  192   0       1     148     0     0.4     1  0
-##   thal target
-## 1    1      1
-## 2    2      1
-## 3    2      1
-## 4    2      1
-## 5    2      1
-## 6    1      1
-\end{verbatim}
+\begin{longtable}[]{@{}rrrrrrrrrrrrrr@{}}
+\toprule
+age & sex & cp & trestbps & chol & fbs & restecg & thalach & exang &
+oldpeak & slope & ca & thal & target\tabularnewline
+\midrule
+\endhead
+63 & 1 & 3 & 145 & 233 & 1 & 0 & 150 & 0 & 2.3 & 0 & 0 & 1 &
+1\tabularnewline
+37 & 1 & 2 & 130 & 250 & 0 & 1 & 187 & 0 & 3.5 & 0 & 0 & 2 &
+1\tabularnewline
+41 & 0 & 1 & 130 & 204 & 0 & 0 & 172 & 0 & 1.4 & 2 & 0 & 2 &
+1\tabularnewline
+56 & 1 & 1 & 120 & 236 & 0 & 1 & 178 & 0 & 0.8 & 2 & 0 & 2 &
+1\tabularnewline
+57 & 0 & 0 & 120 & 354 & 0 & 1 & 163 & 1 & 0.6 & 2 & 0 & 2 &
+1\tabularnewline
+57 & 1 & 0 & 140 & 192 & 0 & 1 & 148 & 0 & 0.4 & 1 & 0 & 1 &
+1\tabularnewline
+\bottomrule
+\end{longtable}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -209,7 +217,7 @@
 ## 
 ##  14  Variables      303  Observations
 ## ---------------------------------------------------------------------------
-## X...age 
+## age 
 ##        n  missing distinct     Info     Mean      Gmd      .05      .10 
 ##      303        0       41    0.999    54.37    10.36     39.1     42.0 
 ##      .25      .50      .75      .90      .95 
@@ -346,7 +354,7 @@
 \begin{Highlighting}[]
 \CommentTok{#Exploratory Data Analysis}
 \CommentTok{#Density of heart presence/absence disease by age}
-\NormalTok{g1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{X...age, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\NormalTok{g1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{age, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{)}\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Age"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
@@ -664,6 +672,254 @@
 \end{Shaded}
 
 \includegraphics{project_report_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{first_factorial <-}\StringTok{ }\NormalTok{proj_indiv}
+\NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(first_factorial, }\DataTypeTok{Class =} \KeywordTok{as.factor}\NormalTok{(k_mean}\OperatorTok{$}\NormalTok{cluster))}
+\KeywordTok{catdes}\NormalTok{(df, }\DataTypeTok{num.var =} \KeywordTok{length}\NormalTok{(df), }\DataTypeTok{proba =} \FloatTok{0.05}\NormalTok{, }\DataTypeTok{row.w =} \OtherTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Link between the cluster variable and the quantitative variables
+## ================================================================
+##            Eta2      P-value
+## Dim.1 0.6316289 8.766734e-66
+## Dim.2 0.5503737 8.467640e-53
+## 
+## Description of each cluster by quantitative variables
+## =====================================================
+## $`1`
+##           v.test Mean in category  Overall mean sd in category Overall sd
+## Dim.1   9.014585        1.0477037  2.852366e-15      0.8712730   1.344089
+## Dim.2 -10.516103       -0.9439256 -3.090499e-16      0.6923393   1.038050
+##            p.value
+## Dim.1 1.976176e-19
+## Dim.2 7.282354e-26
+## 
+## $`2`
+##          v.test Mean in category Overall mean sd in category Overall sd
+## Dim.1 -13.79634        -1.151379 2.852366e-15      0.7373691   1.344089
+##            p.value
+## Dim.1 2.681253e-43
+## 
+## $`3`
+##          v.test Mean in category  Overall mean sd in category Overall sd
+## Dim.2 10.780147        1.1748120 -3.090499e-16      0.7675912   1.038050
+## Dim.1  6.454662        0.9108084  2.852366e-15      0.8858076   1.344089
+##            p.value
+## Dim.2 4.272002e-27
+## Dim.1 1.084604e-10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ "Yes"}
+\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ "No"}
+\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{target <-}\StringTok{ }\OtherTok{NULL}
+
+\NormalTok{factor_heart2 <-}\StringTok{ }\NormalTok{factor_heart}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{age<-}\KeywordTok{cut}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{age, }\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{80}\NormalTok{,}\DecValTok{10}\NormalTok{), }\DataTypeTok{right=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{age <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"Age"}\NormalTok{, factor_heart2}\OperatorTok{$}\NormalTok{age, }\DataTypeTok{sep=}\StringTok{"_"}\NormalTok{)}
+\KeywordTok{min}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{oldpeak)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{oldpeak<-}\KeywordTok{cut}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{oldpeak, }\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{7}\NormalTok{,}\DecValTok{1}\NormalTok{), }\DataTypeTok{right=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{oldpeak <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"Oldp"}\NormalTok{, factor_heart2}\OperatorTok{$}\NormalTok{oldpeak, }\DataTypeTok{sep=}\StringTok{"_"}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{thalach<-}\KeywordTok{cut}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{thalach, }\KeywordTok{seq}\NormalTok{(}\DecValTok{70}\NormalTok{,}\DecValTok{220}\NormalTok{,}\DecValTok{20}\NormalTok{), }\DataTypeTok{right=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{thalach <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"thalach"}\NormalTok{, factor_heart2}\OperatorTok{$}\NormalTok{thalach, }\DataTypeTok{sep=}\StringTok{"_"}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{trestbps<-}\KeywordTok{cut}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{trestbps, }\KeywordTok{seq}\NormalTok{(}\DecValTok{80}\NormalTok{,}\DecValTok{220}\NormalTok{,}\DecValTok{20}\NormalTok{), }\DataTypeTok{right=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{trestbps <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"thres"}\NormalTok{, factor_heart2}\OperatorTok{$}\NormalTok{trestbps, }\DataTypeTok{sep=}\StringTok{"_"}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{chol<-}\KeywordTok{cut}\NormalTok{(factor_heart2}\OperatorTok{$}\NormalTok{chol, }\KeywordTok{seq}\NormalTok{(}\DecValTok{100}\NormalTok{,}\DecValTok{600}\NormalTok{,}\DecValTok{100}\NormalTok{), }\DataTypeTok{right=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{factor_heart2}\OperatorTok{$}\NormalTok{chol <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"Col"}\NormalTok{, factor_heart2}\OperatorTok{$}\NormalTok{chol, }\DataTypeTok{sep=}\StringTok{"_"}\NormalTok{)}
+\CommentTok{#factor_heart2$age <- NULL}
+\KeywordTok{kable}\NormalTok{(}\KeywordTok{head}\NormalTok{(factor_heart2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}llllllllllllll@{}}
+\toprule
+age & sex & cp & trestbps & chol & fbs & restecg & thalach & exang &
+oldpeak & slope & ca & thal & disease\tabularnewline
+\midrule
+\endhead
+Age\_{[}60,70) & 1 & 3 & thres\_{[}140,160) & Col\_{[}200,300) & 1 & 0 &
+thalach\_{[}150,170) & 0 & Oldp\_{[}2,3) & 0 & 0 & 1 & No\tabularnewline
+Age\_{[}30,40) & 1 & 2 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 1 &
+thalach\_{[}170,190) & 0 & Oldp\_{[}3,4) & 0 & 0 & 2 & No\tabularnewline
+Age\_{[}40,50) & 0 & 1 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 0 &
+thalach\_{[}170,190) & 0 & Oldp\_{[}1,2) & 2 & 0 & 2 & No\tabularnewline
+Age\_{[}50,60) & 1 & 1 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 1 &
+thalach\_{[}170,190) & 0 & Oldp\_{[}0,1) & 2 & 0 & 2 & No\tabularnewline
+Age\_{[}50,60) & 0 & 0 & thres\_{[}120,140) & Col\_{[}300,400) & 0 & 1 &
+thalach\_{[}150,170) & 1 & Oldp\_{[}0,1) & 2 & 0 & 2 & No\tabularnewline
+Age\_{[}50,60) & 1 & 0 & thres\_{[}140,160) & Col\_{[}100,200) & 0 & 1 &
+thalach\_{[}130,150) & 0 & Oldp\_{[}0,1) & 1 & 0 & 1 & No\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mcaHeart <-}\StringTok{ }\KeywordTok{MCA}\NormalTok{(factor_heart2,}\DataTypeTok{ncp=}\DecValTok{7}\NormalTok{,}
+               \CommentTok{#quanti.sup=c(10),}
+               \DataTypeTok{quali.sup=}\KeywordTok{c}\NormalTok{(}\DecValTok{14}\NormalTok{),}
+               \DataTypeTok{excl=}\OtherTok{NULL}\NormalTok{,}
+               \DataTypeTok{graph =} \OtherTok{FALSE}\NormalTok{,}
+               \DataTypeTok{level.ventil =} \FloatTok{0.00}\NormalTok{,}
+               \DataTypeTok{axes =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}
+               \DataTypeTok{row.w =} \OtherTok{NULL}\NormalTok{,}
+               \DataTypeTok{method=}\StringTok{"Indicator"}\NormalTok{,}
+               \DataTypeTok{na.method=}\StringTok{"NA"}\NormalTok{,}
+               \DataTypeTok{tab.disj=}\OtherTok{NULL}\NormalTok{)}
+
+\CommentTok{# mcaHeart <- MCA(factor_heart,ncp=7,}
+\CommentTok{#                quanti.sup=c(1,4,5,8,10),}
+\CommentTok{#                quali.sup=c(14),}
+\CommentTok{#                excl=NULL,}
+\CommentTok{#                graph = FALSE,}
+\CommentTok{#                level.ventil = 0.00,}
+\CommentTok{#                axes = c(1,2),}
+\CommentTok{#                row.w = NULL,}
+\CommentTok{#                method="Indicator",}
+\CommentTok{#                na.method="NA",}
+\CommentTok{#                tab.disj=NULL)}
+\KeywordTok{summary}\NormalTok{(mcaHeart)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## MCA(X = factor_heart2, ncp = 7, quali.sup = c(14), excl = NULL,  
+##      graph = FALSE, level.ventil = 0, axes = c(1, 2), row.w = NULL,  
+##      method = "Indicator", na.method = "NA", tab.disj = NULL) 
+## 
+## 
+## Eigenvalues
+##                        Dim.1   Dim.2   Dim.3   Dim.4   Dim.5   Dim.6
+## Variance               0.264   0.142   0.134   0.129   0.126   0.119
+## % of var.              7.805   4.192   3.961   3.803   3.736   3.513
+## Cumulative % of var.   7.805  11.997  15.958  19.761  23.496  27.009
+##                        Dim.7   Dim.8   Dim.9  Dim.10  Dim.11  Dim.12
+## Variance               0.110   0.108   0.106   0.101   0.097   0.096
+## % of var.              3.263   3.188   3.131   2.981   2.869   2.844
+## Cumulative % of var.  30.273  33.460  36.592  39.573  42.442  45.286
+##                       Dim.13  Dim.14  Dim.15  Dim.16  Dim.17  Dim.18
+## Variance               0.093   0.090   0.088   0.085   0.081   0.079
+## % of var.              2.759   2.661   2.587   2.521   2.390   2.332
+## Cumulative % of var.  48.045  50.706  53.293  55.814  58.204  60.536
+##                       Dim.19  Dim.20  Dim.21  Dim.22  Dim.23  Dim.24
+## Variance               0.079   0.077   0.075   0.072   0.070   0.068
+## % of var.              2.322   2.283   2.213   2.140   2.079   1.997
+## Cumulative % of var.  62.858  65.141  67.355  69.495  71.574  73.571
+##                       Dim.25  Dim.26  Dim.27  Dim.28  Dim.29  Dim.30
+## Variance               0.066   0.064   0.063   0.060   0.057   0.055
+## % of var.              1.950   1.891   1.850   1.782   1.693   1.635
+## Cumulative % of var.  75.521  77.412  79.262  81.043  82.736  84.371
+##                       Dim.31  Dim.32  Dim.33  Dim.34  Dim.35  Dim.36
+## Variance               0.054   0.052   0.050   0.046   0.044   0.040
+## % of var.              1.596   1.543   1.491   1.364   1.291   1.192
+## Cumulative % of var.  85.968  87.511  89.002  90.366  91.657  92.849
+##                       Dim.37  Dim.38  Dim.39  Dim.40  Dim.41  Dim.42
+## Variance               0.039   0.037   0.034   0.031   0.029   0.026
+## % of var.              1.138   1.085   1.008   0.916   0.852   0.771
+## Cumulative % of var.  93.987  95.072  96.080  96.996  97.848  98.619
+##                       Dim.43  Dim.44
+## Variance               0.024   0.023
+## % of var.              0.712   0.669
+## Cumulative % of var.  99.331 100.000
+## 
+## Individuals (the 10 first)
+##                Dim.1    ctr   cos2    Dim.2    ctr   cos2    Dim.3    ctr
+## 1           |  0.527  0.347  0.055 |  0.515  0.618  0.052 |  0.515  0.652
+## 2           | -0.428  0.229  0.039 |  0.110  0.028  0.003 |  0.790  1.537
+## 3           | -0.681  0.579  0.257 |  0.057  0.008  0.002 | -0.091  0.020
+## 4           | -0.718  0.645  0.376 | -0.104  0.025  0.008 |  0.229  0.129
+## 5           | -0.262  0.086  0.043 |  0.111  0.029  0.008 | -0.379  0.354
+## 6           |  0.229  0.065  0.020 | -0.107  0.027  0.004 |  0.451  0.500
+## 7           | -0.206  0.053  0.026 |  0.191  0.085  0.022 | -0.453  0.505
+## 8           | -0.656  0.538  0.274 | -0.209  0.101  0.028 |  0.359  0.318
+## 9           | -0.194  0.047  0.014 |  0.300  0.210  0.032 |  0.204  0.102
+## 10          | -0.484  0.293  0.126 | -0.003  0.000  0.000 |  0.079  0.015
+##               cos2  
+## 1            0.052 |
+## 2            0.132 |
+## 3            0.005 |
+## 4            0.038 |
+## 5            0.090 |
+## 6            0.076 |
+## 7            0.124 |
+## 8            0.082 |
+## 9            0.015 |
+## 10           0.003 |
+## 
+## Categories (the 10 first)
+##                Dim.1    ctr   cos2 v.test    Dim.2    ctr   cos2 v.test  
+## Age_[20,30) | -1.800  0.311  0.011 -1.800 |  0.241  0.010  0.000  0.241 |
+## Age_[30,40) | -1.140  1.873  0.068 -4.521 | -0.337  0.305  0.006 -1.338 |
+## Age_[40,50) | -0.641  2.839  0.128 -6.214 | -0.230  0.679  0.016 -2.228 |
+## Age_[50,60) |  0.158  0.299  0.017  2.298 | -0.011  0.003  0.000 -0.165 |
+## Age_[60,70) |  0.532  2.178  0.102  5.540 |  0.246  0.865  0.022  2.559 |
+## Age_[70,80) |  0.271  0.071  0.003  0.870 |  0.310  0.172  0.003  0.996 |
+## sex_0       | -0.294  0.798  0.040 -3.481 |  0.588  5.932  0.160  6.955 |
+## sex_1       |  0.136  0.370  0.040  3.481 | -0.273  2.751  0.160 -6.955 |
+## cp_0        |  0.638  5.586  0.363 10.474 | -0.164  0.687  0.024 -2.692 |
+## cp_1        | -0.957  4.396  0.181 -7.390 |  0.035  0.011  0.000  0.271 |
+##              Dim.3    ctr   cos2 v.test  
+## Age_[20,30)  4.476  3.794  0.066  4.476 |
+## Age_[30,40)  1.347  5.156  0.095  5.344 |
+## Age_[40,50)  0.305  1.271  0.029  2.962 |
+## Age_[50,60)  0.059  0.081  0.002  0.854 |
+## Age_[60,70) -0.618  5.780  0.137 -6.429 |
+## Age_[70,80) -0.459  0.398  0.007 -1.472 |
+## sex_0       -0.721  9.462  0.241 -8.538 |
+## sex_1        0.335  4.388  0.241  8.538 |
+## cp_0        -0.031  0.026  0.001 -0.505 |
+## cp_1         0.247  0.579  0.012  1.911 |
+## 
+## Categorical variables (eta2)
+##               Dim.1 Dim.2 Dim.3  
+## age         | 0.260 0.038 0.287 |
+## sex         | 0.040 0.160 0.241 |
+## cp          | 0.421 0.030 0.047 |
+## trestbps    | 0.119 0.313 0.068 |
+## chol        | 0.014 0.140 0.228 |
+## fbs         | 0.018 0.053 0.002 |
+## restecg     | 0.096 0.068 0.002 |
+## thalach     | 0.519 0.119 0.314 |
+## exang       | 0.336 0.061 0.001 |
+## oldpeak     | 0.507 0.476 0.192 |
+## 
+## Supplementary categories
+##                 Dim.1    cos2  v.test     Dim.2    cos2  v.test     Dim.3
+## No          |  -0.619   0.458 -11.767 |   0.142   0.024   2.694 |  -0.040
+## Yes         |   0.740   0.458  11.767 |  -0.170   0.024  -2.694 |   0.048
+##                cos2  v.test  
+## No            0.002  -0.766 |
+## Yes           0.002   0.766 |
+## 
+## Supplementary categorical variables (eta2)
+##               Dim.1 Dim.2 Dim.3  
+## disease     | 0.458 0.024 0.002 |
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-21-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-21-2.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-23-1.pdf}
 
 
 \end{document}
