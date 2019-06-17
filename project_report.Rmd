@@ -33,6 +33,13 @@ library(factoextra)
 library(expm)
 library(fpc)
 library(cluster)
+library(caret)
+library(ROCR)
+library(dplyr)
+library(randomForest)
+library(expm)
+library(adegraphics)
+library(fpc)
 
 theme_set(theme_bw())
 setwd("/Users/JaviFerrando/Desktop/MVA-Project")
@@ -70,55 +77,77 @@ factor_heart$ca <- as.factor(heart_disease$ca)
 ```{r}
 #Outlier detection
 ############################
-#Moutlier(heart_disease[,-14], quantile = 0.975, plot = TRUE, tol=1e-36) #Doesn't work
+cont_heart <- factor_heart[, sapply(factor_heart, class) != "factor"]
+mout <- Moutlier(cont_heart, quantile = 0.975, plot = TRUE, tol=1e-36) #Doesn't work
+plot(mout$md,mout$rd,xlab='Classical Mahalanobis distance',ylab='Robust Mahalanobis distance')
+abline(h = mout$cutoff, col="red")  # add cutoff line
+abline(v = mout$cutoff, col="red")  # add cutoff line
+```
 
-
+```{r}
 #Local Outlier Factor
 outlier.scores <- lofactor(heart_disease[,-14], k=5)
 plot(density(outlier.scores),main='Distribution of individuals local outlier factor scores')
+LOF_plot <- plot(outlier.scores, 
+                 pch="o", 
+                 cex=1, 
+                 main="Potential LOF outliers\n by local outliers factor analysis (LOF-k=5)",
+                 ylab="LOF Rank")
+#LOF_plot_cutoff <- 0.5*(LOF_df[LOF_index_ordered[4],]$LOF_rank + LOF_df[LOF_index_ordered[5],]$LOF_rank)
+abline(h = 1, col="red")  # add cutoff line
 ```
+
+
 
 ```{r}
 #Exploratory Data Analysis
 #Density of heart presence/absence disease by age
 g1 <- ggplot(data=heart_disease, aes(x=age, fill=as.factor(target)))+
   geom_density(alpha=.5)+
-  ggtitle("Age") +
-  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
+  labs(x = 'Years', title = 'Age') +
+  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
 
 #Density of heart presence/absence disease by Max heart rate
 g2 <- ggplot(data=heart_disease, aes(x=thalach, fill=as.factor(target)))+
   geom_density(alpha=.5)+
-  ggtitle("Max Hear Rate") +
-  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
+  labs(x = 'Heart Rate BPM', title = 'Thalach') +
+  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
 
 #Density of heart presence/absence disease by sex
 g3 <- ggplot(data=heart_disease, aes(x=sex, fill=as.factor(target)))+
       geom_bar(alpha=.5, color="black")+
-      ggtitle("Sex") +
-      scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
+      labs(x = 'Women/Men', title = 'Sex') +
+      #scale_x_discrete(breaks=c("0","1"),labels=c("Women", "Men")) +
+      scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
 
 #Density of heart presence/absence disease by chest type
 g4 <- ggplot(data=heart_disease, aes(x=cp, fill=as.factor(target)))+
   geom_bar(alpha=.5, color="black")+
-  ggtitle("Chest Pain type") +
-  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("Yes", "No"))
+  labs(x = 'Type', title = 'Chest Pain (cp)') +
+  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
 
 grid.arrange(g1, g2, g3, g4, ncol = 2)
+```
+```{r}
+g5 <- ggplot(data=heart_disease, aes(x=oldpeak, fill=as.factor(target)))+
+  geom_density(alpha=.5) +
+  labs(x = 'ST Depression (mV)', title = 'Oldpeak') +
+  scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
+grid.arrange(g5)
 ```
 
 ```{r}
 plot_correlation(heart_disease)
 ```
 ```{r}
-#PCA with categoriacal values
+#PCA with continuous values
 pca_facto <- factor_heart[, sapply(factor_heart, class) != "factor"]
 #Some categorical values can be added as supplementary
 #pca_facto$sex <- factor_heart$sex
 #pca_facto$ca <- factor_heart$ca
 pca_facto$disease <- heart_disease$target
-pca_facto$disease[pca_facto$disease==0] <- "Yes"
-pca_facto$disease[pca_facto$disease==1] <- "No"
+pca_facto$disease[pca_facto$disease==0] <- "No"
+pca_facto$disease[pca_facto$disease==1] <- "Yes"
 
 pca_facto_heart <- PCA(pca_facto, quali.sup = 6, scale.unit = TRUE,  graph = TRUE)
 ```
@@ -148,6 +177,7 @@ fviz_pca_var(pca_facto_heart, geom = c("arrow", "text"), col.var = "cos2")#By qu
 
 ```{r}
 proj_indiv <- pca_facto_heart$ind$coord[,1:2] #individual projections on 1st factorial plane
+plot(proj_indiv)
 #Clustering
 hc_ward = hclust(dist(proj_indiv),method = "ward.D")
 plot(hc_ward, main= "HC using Ward Agglomeration method", xlab="",sub="",cex=.9,  labels=FALSE)
@@ -212,7 +242,7 @@ indexes_before <- get_indexes(10, 'hc')
 plot(indexes_before, type = "o", xlab = 'Number of classes', ylab = 'Calinski index value'
 , main = 'Index before consolidation', col = 'blue', xaxt
 = "n")
-axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))  
+axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))
 ```
 
 ```{r}
@@ -226,12 +256,17 @@ axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))
 ```{r}
 first_factorial <- proj_indiv
 df <- data.frame(first_factorial, Class = as.factor(k_mean$cluster))
-catdes(df, num.var = length(df), proba = 0.05, row.w = NULL)
+df2 <- cbind(as.factor(k_mean$cluster),heart_disease[,1:13])
+catdes_k_means <- catdes(df2, num.var = 1, proba = 0.05, row.w = NULL)
+
+catdes_k_means$quanti$`1`[1:6,4]  #  p-values for cluster 1
+catdes_k_means$quanti$`2`[1:6,4]  #  p-values for cluster 2
+catdes_k_means$quanti$`3`[1:6,4]  #  p-values for cluster 3
 ```
 
 ```{r}
-factor_heart$disease[factor_heart$target==0] <- "Yes"
-factor_heart$disease[factor_heart$target==1] <- "No"
+factor_heart$disease[factor_heart$target==0] <- "No"
+factor_heart$disease[factor_heart$target==1] <- "Yes"
 factor_heart$target <- NULL
 
 factor_heart2 <- factor_heart
@@ -308,6 +343,18 @@ fviz_mca_var(mcaHeart,
              geom=c("point","text"),
              repel=T,
              title = "Variables - MCA")
+coordinates_mca_cats <- mcaHeart$var$coord[,1:2]
+
+cos_2_cats <- rowSums(mcaHeart$var$cos2[,1:2])
+top_cos2_cats <- sort(cos_2_cats,decreasing=TRUE)[1:15]
+top_cos2_cats_df <- as.data.frame(top_cos2_cats)
+top_cos2_names <- rownames(top_cos2_cats_df)
+
+library(data.table)
+
+coordinates_mca <- setDT(as.data.frame(mcaHeart$var$coord[,1:2]), keep.rownames = TRUE)[]
+coordinates_top_cos2 <- coordinates_mca[coordinates_mca$rn %in% top_cos2_names,]
+
 ```
 
 
@@ -333,4 +380,338 @@ fviz_mca_biplot(mcaHeart,
 
 ```{r,echo=FALSE}
 fviz_screeplot(mcaHeart, addlabels = FALSE)
+```
+
+```{r,echo=FALSE}
+evals <- get_eigenvalue(mcaHeart)[,1]  # 2nd and 3rd columns are % inertia explained and cumulative percentage
+evals <- mcaHeart$eig[,1]
+evals_c <- evals-mean(evals)  # corrected eigenvalues
+evals_c <- evals_c[evals_c>0]
+
+sumation <- evals_c/sum(evals_c)
+total_var_exp_sugn <- sum(sumation[1:6])*100 #80.71%
+
+plot(evals_c/sum(evals_c),
+     col="blue",
+     type="b", 
+     xlab="Dimensions",ylab="Cumulative inertia explained",
+     main="Scree plot for MCA of Heart Disease dataset")
+abline(h=0.0499072811,col="red")
+nd <-6
+#cat("Inertia explained:",cumsum(100*evals_c/sum(evals_c))[nd],"\n")
+```
+
+```{r,echo=FALSE}
+psiHeart<- mcaHeart$ind$coord[,1:nd]   # yields obs coordinates, for nd significant dim, in PC factorial space, R^min(p,nd)
+distHeart <- dist(psiHeart, method = "euclidean")
+treeHeart <- hclust(distHeart, method = "ward.D2")
+#plot(treeCars)
+treeJoins <- length(treeHeart$height)
+
+indexes_before <- get_indexes(10, 'hc')
+
+
+plot(indexes_before, type = "o", xlab = 'Number of classes', ylab = 'Calinski index value'
+, main = 'Calinski Harabasz Index over different number of clusters', col = 'firebrick1', xaxt
+= "n")
+axis(1, at=1:9, labels = c(2, 3, 4, 5, 6, 7,8,9,10))
+
+
+NC = 3  #  <<<<<<<<  OUR CONCLUSION / CHOICE !!!!!!!!!!
+cut <- cutree(treeHeart,k=NC)  # identifying levels to indiv. according to NC clusters
+cal_idx_before_mca<- calinhara(psiHeart,cut,cn=max(cut))#Before consolidation
+
+
+plot(treeHeart,
+     main='Hierarchical Clustering (Ward.D2)',
+     xlab='Distance',
+     cex=0.6,
+     label=FALSE)
+abline(h=6.5,col='blue')
+rect.hclust(treeHeart, k=NC, border=2:6) 
+
+```
+
+```{r,echo=FALSE}
+centroids <- aggregate(psiHeart,list(cut),mean)[,2:(nd+1)] # take out 1st column = row labels
+kmeanHeart_mca <- kmeans(psiHeart,centers=centroids)
+classes_mca <- kmeanHeart_mca$cluster
+
+# Quality index after consolidation
+#Bss <- sum(rowSums(kmeanHeart_mca$centers^2)*kmeanHeart_mca$size)  # kmeanCars$betweenss
+#Wss <- sum(kmeanHeart_mca$withinss)                           # kmeanCars$tot.withinss
+#Ib_consol <- 100*Bss/(Bss+Wss)
+
+cal_idx_after_mca <- calinhara(psiHeart,classes_mca,cn=max(classes_mca))
+library(directlabels)
+library(plotrix)
+# Plot
+par(mfrow=c(1,1))
+plot(psiHeart[,1],psiHeart[,2],
+     xlab='PC1',ylab='PC2',
+     pch=16,
+     type="p",
+     col=cut+16,
+     main="Clusters after consolidation on MCA projections"
+)
+points(coordinates_top_cos2$`Dim 1`,coordinates_top_cos2$`Dim 2`, pos=1, pch = NA_integer_)
+text(coordinates_top_cos2$`Dim 1`, coordinates_top_cos2$`Dim 2`, labels=coordinates_top_cos2$rn, cex= 0.7, offset = 1)
+#spread.labels(coordinates_top_cos2$`Dim 1`, coordinates_top_cos2$`Dim 2`,labels=coordinates_top_cos2$rn,ony=TRUE,offsets=0.02,between=FALSE,linecol=par("fg"),srt=0)
+#direct.label(xyplot(b~a,dfr,groups=t, col="black"))
+#points(centroids,pch=15,type='p',col=16+seq(NC),cex= 1.8)
+#text(centroids,labels=paste0("C",1:NC),pos=1,cex=1.2)
+abline(h=0,v=0,col="gray")
+
+(catdes_mca<- catdes(cbind(as.factor(kmeanHeart_mca$cluster),factor_heart2[,1:13]),
+                      1,           # index of the variable to characterized, i.e. 'kmeanCars$cluster'
+                      proba=0.01,  # significance threshold considered to characterize category
+                      row.w=NULL))
+kable(catdes_mca$category$`1`)
+kable(catdes_mca$category$`2`)
+kable(catdes_mca$category$`3`)
+```
+
+```{r,echo=FALSE}
+require(caTools)
+set.seed(123)   #  set seed to ensure you always have same random numbers generated
+sample = sample.split(factor_heart,SplitRatio = 0.667) # splits the data in the ratio mentioned in SplitRatio. After splitting marks these rows as logical TRUE and the the remaining are marked as logical FALSE
+train <- subset(factor_heart,sample ==TRUE) # creates a training dataset named train1 with rows which are marked as TRUE
+test <- subset(factor_heart, sample==FALSE)
+
+```
+
+```{r,echo=FALSE}
+#Test/Training distribution
+g5 <- ggplot(data=test, aes(x=disease, fill=as.factor(disease)))+
+      geom_bar(alpha=.5, color="black")+
+      ggtitle("Test set") +
+      scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
+
+g6 <- ggplot(data=train, aes(x=disease, fill=as.factor(disease)))+
+      geom_bar(alpha=.5, color="black")+
+      ggtitle("Training set") +
+      scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
+
+
+grid.arrange(g5, g6, ncol=2)
+```
+
+```{r,echo=FALSE}
+DecisionTree = rpart(disease ~ ., data=train,control=rpart.control(cp=0.001, xval=10))
+printcp(DecisionTree)
+
+treeSize = DecisionTree$cptable[,2]+1 #nsplit
+treeImpurity = DecisionTree$cptable[,3] #rel error
+cvImpurity = DecisionTree$cptable[,4] #xerror
+
+plot(treeSize, treeImpurity, main="R(T)", xlab="size of the tree", ylab="Relativity Impurity", type="o", col='red') 
+lines(treeSize, cvImpurity ,type="o", col='blue')
+legend("topright", c("All training data","CV training data"), col=c('red', 'blue'), lty=1)
+```
+
+```{r, echo=FALSE}
+DecisionTree$cptable = as.data.frame(DecisionTree $cptable)
+ind = which.min(DecisionTree$cptable$xerror)
+xerr <-DecisionTree$cptable$xerror[ind]
+xstd <-DecisionTree$cptable$xstd[ind]
+
+i = 1
+while (DecisionTree$cptable$xerror[i] > xerr+xstd){
+  i = i+1
+}
+alfa = DecisionTree$cptable$CP[i]
+
+optimal <- prune(DecisionTree, cp=alfa)
+par(mfrow = c(1,1), xpd = NA)
+plot(optimal)
+text(optimal, use.n=T,cex=0.8,col="blue")
+```
+
+```{r, echo=FALSE}
+importance_vars <- barplot(optimal$variable.importance,
+                    main="Importance of the variables",
+                    xaxt="n",
+                    xlab="Variables",
+                    ylab="Importance",
+                    ylim = c(0,120),
+                    col="darkgrey")
+text(cex=1, x=importance_vars-.25, y=-15, names(optimal$variable.importance), xpd=TRUE, srt=45)
+```
+
+```{r, echo=FALSE}
+test$target[test$disease=="No"] <- 0
+test$target[test$disease=="Yes"] <- 1
+
+train$target[train$disease=="No"] <- 0
+train$target[train$disease=="Yes"] <- 1
+
+test_size <- nrow(test)
+draw_confusion_matrix <- function(cm) {
+
+  layout(matrix(c(1,1,2)))
+  par(mar=c(2,2,2,2))
+  plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+  title('CONFUSION MATRIX', cex.main=2)
+
+  # create the matrix 
+  rect(150, 430, 240, 370, col='#3F97D0')
+  text(195, 435, '0', cex=1.2)
+  rect(250, 430, 340, 370, col='#F7AD50')
+  text(295, 435, '1', cex=1.2)
+  text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+  text(245, 450, 'True value', cex=1.3, font=2)
+  rect(150, 305, 240, 365, col='#F7AD50')
+  rect(250, 305, 340, 365, col='#3F97D0')
+  text(140, 400, '0', cex=1.2, srt=90)
+  text(140, 335, '1', cex=1.2, srt=90)
+
+  # add in the cm results 
+  res <- as.numeric(cm$table)
+  text(195, 400, res[1], cex=1.6, font=2, col='white')
+  text(195, 335, res[2], cex=1.6, font=2, col='white')
+  text(295, 400, res[3], cex=1.6, font=2, col='white')
+  text(295, 335, res[4], cex=1.6, font=2, col='white')
+
+  # add in the specifics 
+  plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+  text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+  text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+  text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+  text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+  text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+  text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+  text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+  text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+  text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+  text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+
+  # add in the accuracy information 
+  text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+  text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+  text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+  text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+}  
+
+
+prediction = predict(optimal, test)
+predicted_val = c()
+for (i in 1:test_size){
+  if(max(prediction[i,1], prediction[i,2]) == prediction[i,1]){
+    predicted_val[i] = 0
+  }else{
+    predicted_val[i] = 1
+  }
+}
+
+cf <- confusionMatrix(factor(predicted_val), factor(test$target), positive="1", dnn = c("Prediction", "True values"))
+draw_confusion_matrix(cf)
+```
+
+
+```{r, echo=FALSE}
+prediction_df = as.data.frame(predict(optimal,newdata = test,type = "prob"))
+
+prediction = prediction(prediction_df$`Yes`, test$disease)
+roc = performance(prediction ,measure="tpr",x.measure="fpr")
+plot(roc, main="ROC curve")
+abline(0,1,col="blue")
+auc = performance(prediction,"auc")
+auc = as.numeric(auc@y.values)
+kable(data.frame('AUC value'=auc))
+```
+
+```{r, include=FALSE}
+
+sample = sample.split(factor_heart,SplitRatio = 0.667) # splits the data in the ratio mentioned in SplitRatio. After splitting marks these rows as logical TRUE and the the remaining are marked as logical FALSE
+rf_train =subset(factor_heart,sample ==TRUE) # creates a training dataset named train1 with rows which are marked as TRUE
+rf_test=subset(factor_heart, sample==FALSE)
+rf_test$target[rf_test$disease=="No"] <- 0
+rf_test$target[rf_test$disease=="Yes"] <- 1
+
+rf_train$target[rf_train$disease=="No"] <- 0
+rf_train$target[rf_train$disease=="Yes"] <- 1
+
+rf_train$disease <- NULL
+rf_test$disease <- NULL
+
+
+
+
+# random_forest <- randomForest(formula = target ~.,
+#                         data=rf_train,
+#                         mtry=3,      # three predictor-vars selected randomly at each split
+#                         xtest=rf_test[-14],
+#                         ytest=as.factor(rf_test$target),
+#                         #ytest=as.factor(audit_imp$Adjusted[testRows]),
+#                         importance=T,
+#                         ntree=500,   # acceptably large value to ensure each sample row is predicted 
+#                                      # at least 2-digit nbr of times on average
+#                         nodesize = 50,
+#                         maxnodes = 40,
+#                         norm.votes=T )
+
+
+
+
+
+
+#rf <- randomForest(formula = target ~., data=rf_train)
+```
+
+
+```{r, echo=FALSE}
+# df_rf_predictions <- as.factor(predict(rf, newdata=rf_test, type="class"))
+# 
+# cf <- confusionMatrix(factor(df_rf_predictions), factor(rf_test$target), positive="1", dnn = c("Prediction", "True values"))
+# draw_confusion_matrix(cf)
+```
+
+```{r}
+test$type <- 'test'
+train$type <- 'train'
+test_train <- rbind(test,train)
+library(cowplot)
+
+g0 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = thalach, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'PIE', title = 'contexts')
+
+g7 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = age, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'Years', title = 'Age') +
+  theme(legend.position="none")
+g8 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = thalach, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'Heart Rate BPM', title = 'Thalach') +
+  theme(legend.position="none")
+
+g9 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = oldpeak, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'ST Depression (mV)', title = 'Oldpeak') +
+  theme(legend.position="none")
+
+g10 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = chol, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'mg/dl', title = 'Chol') +
+  theme(legend.position="none")
+
+g11 <- test_train[test_train$type==c('test','train'),] %>%
+  ggplot(aes(x = trestbps, fill=type)) + 
+  #geom_density(alpha = 0.5) + 
+  geom_histogram()+
+  labs(x = 'mm/Hg ', title = 'Trestbps') +
+  theme(legend.position="none")
+
+legend <- get_legend(g0 + theme(legend.position=c(0.8, 0.6)) + theme(legend.box = "horizontal") + theme(legend.text=element_text(size=20)))
+grid.arrange(g7, g8, g9, g10, g11, legend,ncol = 2)
 ```

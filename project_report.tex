@@ -134,6 +134,15 @@
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(chemometrics)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'rpart' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(DMwR)}
 \KeywordTok{library}\NormalTok{(mice)}
 \KeywordTok{library}\NormalTok{(missForest)}
@@ -157,6 +166,13 @@
 \KeywordTok{library}\NormalTok{(expm)}
 \KeywordTok{library}\NormalTok{(fpc)}
 \KeywordTok{library}\NormalTok{(cluster)}
+\KeywordTok{library}\NormalTok{(caret)}
+\KeywordTok{library}\NormalTok{(ROCR)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\KeywordTok{library}\NormalTok{(randomForest)}
+\KeywordTok{library}\NormalTok{(expm)}
+\KeywordTok{library}\NormalTok{(adegraphics)}
+\KeywordTok{library}\NormalTok{(fpc)}
 
 \KeywordTok{theme_set}\NormalTok{(}\KeywordTok{theme_bw}\NormalTok{())}
 \KeywordTok{setwd}\NormalTok{(}\StringTok{"/Users/JaviFerrando/Desktop/MVA-Project"}\NormalTok{)}
@@ -339,45 +355,76 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \begin{Highlighting}[]
 \CommentTok{#Outlier detection}
 \NormalTok{############################}
-\CommentTok{#Moutlier(heart_disease[,-14], quantile = 0.975, plot = TRUE, tol=1e-36) #Doesn't work}
-
-
-\CommentTok{#Local Outlier Factor}
-\NormalTok{outlier.scores <-}\StringTok{ }\KeywordTok{lofactor}\NormalTok{(heart_disease[,}\OperatorTok{-}\DecValTok{14}\NormalTok{], }\DataTypeTok{k=}\DecValTok{5}\NormalTok{)}
-\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(outlier.scores),}\DataTypeTok{main=}\StringTok{'Distribution of individuals local outlier factor scores'}\NormalTok{)}
+\NormalTok{cont_heart <-}\StringTok{ }\NormalTok{factor_heart[, }\KeywordTok{sapply}\NormalTok{(factor_heart, class) }\OperatorTok{!=}\StringTok{ "factor"}\NormalTok{]}
+\NormalTok{mout <-}\StringTok{ }\KeywordTok{Moutlier}\NormalTok{(cont_heart, }\DataTypeTok{quantile =} \FloatTok{0.975}\NormalTok{, }\DataTypeTok{plot =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{tol=}\FloatTok{1e-36}\NormalTok{) }\CommentTok{#Doesn't work}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+## Warning in plot.window(...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in plot.xy(xy, type, ...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in axis(side = side, at = at, labels = labels, ...): "tol" is not a
+## graphical parameter
+
+## Warning in axis(side = side, at = at, labels = labels, ...): "tol" is not a
+## graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in box(...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in title(...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in plot.window(...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in plot.xy(xy, type, ...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in axis(side = side, at = at, labels = labels, ...): "tol" is not a
+## graphical parameter
+
+## Warning in axis(side = side, at = at, labels = labels, ...): "tol" is not a
+## graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in box(...): "tol" is not a graphical parameter
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in title(...): "tol" is not a graphical parameter
+\end{verbatim}
 
 \includegraphics{project_report_files/figure-latex/unnamed-chunk-4-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{#Exploratory Data Analysis}
-\CommentTok{#Density of heart presence/absence disease by age}
-\NormalTok{g1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{age, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{)}\OperatorTok{+}
-\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Age"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(mout}\OperatorTok{$}\NormalTok{md,mout}\OperatorTok{$}\NormalTok{rd,}\DataTypeTok{xlab=}\StringTok{'Classical Mahalanobis distance'}\NormalTok{,}\DataTypeTok{ylab=}\StringTok{'Robust Mahalanobis distance'}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =}\NormalTok{ mout}\OperatorTok{$}\NormalTok{cutoff, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)  }\CommentTok{# add cutoff line}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v =}\NormalTok{ mout}\OperatorTok{$}\NormalTok{cutoff, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)  }\CommentTok{# add cutoff line}
+\end{Highlighting}
+\end{Shaded}
 
-\CommentTok{#Density of heart presence/absence disease by Max heart rate}
-\NormalTok{g2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{thalach, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{)}\OperatorTok{+}
-\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Max Hear Rate"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-4-2.pdf}
 
-\CommentTok{#Density of heart presence/absence disease by sex}
-\NormalTok{g3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{sex, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
-\StringTok{      }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{)}\OperatorTok{+}
-\StringTok{      }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Sex"}\NormalTok{) }\OperatorTok{+}
-\StringTok{      }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
-
-\CommentTok{#Density of heart presence/absence disease by chest type}
-\NormalTok{g4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{cp, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{)}\OperatorTok{+}
-\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Chest Pain type"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
-
-\KeywordTok{grid.arrange}\NormalTok{(g1, g2, g3, g4, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Local Outlier Factor}
+\NormalTok{outlier.scores <-}\StringTok{ }\KeywordTok{lofactor}\NormalTok{(heart_disease[,}\OperatorTok{-}\DecValTok{14}\NormalTok{], }\DataTypeTok{k=}\DecValTok{5}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(outlier.scores),}\DataTypeTok{main=}\StringTok{'Distribution of individuals local outlier factor scores'}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -385,7 +432,47 @@ oldpeak & slope & ca & thal & target\tabularnewline
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot_correlation}\NormalTok{(heart_disease)}
+\NormalTok{LOF_plot <-}\StringTok{ }\KeywordTok{plot}\NormalTok{(outlier.scores, }
+                 \DataTypeTok{pch=}\StringTok{"o"}\NormalTok{, }
+                 \DataTypeTok{cex=}\DecValTok{1}\NormalTok{, }
+                 \DataTypeTok{main=}\StringTok{"Potential LOF outliers}\CharTok{\textbackslash{}n}\StringTok{ by local outliers factor analysis (LOF-k=5)"}\NormalTok{,}
+                 \DataTypeTok{ylab=}\StringTok{"LOF Rank"}\NormalTok{)}
+\CommentTok{#LOF_plot_cutoff <- 0.5*(LOF_df[LOF_index_ordered[4],]$LOF_rank + LOF_df[LOF_index_ordered[5],]$LOF_rank)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{)  }\CommentTok{# add cutoff line}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Exploratory Data Analysis}
+\CommentTok{#Density of heart presence/absence disease by age}
+\NormalTok{g1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{age, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{)}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Years'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Age'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{))}
+
+\CommentTok{#Density of heart presence/absence disease by Max heart rate}
+\NormalTok{g2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{thalach, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{)}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Heart Rate BPM'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Thalach'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{))}
+
+\CommentTok{#Density of heart presence/absence disease by sex}
+\NormalTok{g3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{sex, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\StringTok{      }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{)}\OperatorTok{+}
+\StringTok{      }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Women/Men'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Sex'}\NormalTok{) }\OperatorTok{+}
+\StringTok{      }\CommentTok{#scale_x_discrete(breaks=c("0","1"),labels=c("Women", "Men")) +}
+\StringTok{      }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{))}
+
+\CommentTok{#Density of heart presence/absence disease by chest type}
+\NormalTok{g4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{cp, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{)}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Type'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Chest Pain (cp)'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{))}
+
+\KeywordTok{grid.arrange}\NormalTok{(g1, g2, g3, g4, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -393,21 +480,41 @@ oldpeak & slope & ca & thal & target\tabularnewline
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{#PCA with categoriacal values}
+\NormalTok{g5 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{heart_disease, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{oldpeak, }\DataTypeTok{fill=}\KeywordTok{as.factor}\NormalTok{(target)))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'ST Depression (mV)'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Oldpeak'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{'skyblue4'}\NormalTok{, }\StringTok{'skyblue2'}\NormalTok{),}\DataTypeTok{name =} \StringTok{"Disease"}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"No"}\NormalTok{, }\StringTok{"Yes"}\NormalTok{))}
+\KeywordTok{grid.arrange}\NormalTok{(g5)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_correlation}\NormalTok{(heart_disease)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#PCA with continuous values}
 \NormalTok{pca_facto <-}\StringTok{ }\NormalTok{factor_heart[, }\KeywordTok{sapply}\NormalTok{(factor_heart, class) }\OperatorTok{!=}\StringTok{ "factor"}\NormalTok{]}
 \CommentTok{#Some categorical values can be added as supplementary}
 \CommentTok{#pca_facto$sex <- factor_heart$sex}
 \CommentTok{#pca_facto$ca <- factor_heart$ca}
 \NormalTok{pca_facto}\OperatorTok{$}\NormalTok{disease <-}\StringTok{ }\NormalTok{heart_disease}\OperatorTok{$}\NormalTok{target}
-\NormalTok{pca_facto}\OperatorTok{$}\NormalTok{disease[pca_facto}\OperatorTok{$}\NormalTok{disease}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ "Yes"}
-\NormalTok{pca_facto}\OperatorTok{$}\NormalTok{disease[pca_facto}\OperatorTok{$}\NormalTok{disease}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ "No"}
+\NormalTok{pca_facto}\OperatorTok{$}\NormalTok{disease[pca_facto}\OperatorTok{$}\NormalTok{disease}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ "No"}
+\NormalTok{pca_facto}\OperatorTok{$}\NormalTok{disease[pca_facto}\OperatorTok{$}\NormalTok{disease}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ "Yes"}
 
 \NormalTok{pca_facto_heart <-}\StringTok{ }\KeywordTok{PCA}\NormalTok{(pca_facto, }\DataTypeTok{quali.sup =} \DecValTok{6}\NormalTok{, }\DataTypeTok{scale.unit =} \OtherTok{TRUE}\NormalTok{,  }\DataTypeTok{graph =} \OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-7-1.pdf}
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-7-2.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-9-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-9-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -416,7 +523,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-8-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-10-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -427,7 +534,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-8-2.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-10-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -437,7 +544,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-9-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-11-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -538,7 +645,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 ## graphical parameter
 \end{verbatim}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-9-2.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-11-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -548,11 +655,19 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-10-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-12-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{proj_indiv <-}\StringTok{ }\NormalTok{pca_facto_heart}\OperatorTok{$}\NormalTok{ind}\OperatorTok{$}\NormalTok{coord[,}\DecValTok{1}\OperatorTok{:}\DecValTok{2}\NormalTok{] }\CommentTok{#individual projections on 1st factorial plane}
+\KeywordTok{plot}\NormalTok{(proj_indiv)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \CommentTok{#Clustering}
 \NormalTok{hc_ward =}\StringTok{ }\KeywordTok{hclust}\NormalTok{(}\KeywordTok{dist}\NormalTok{(proj_indiv),}\DataTypeTok{method =} \StringTok{"ward.D"}\NormalTok{)}
 \KeywordTok{plot}\NormalTok{(hc_ward, }\DataTypeTok{main=} \StringTok{"HC using Ward Agglomeration method"}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{""}\NormalTok{,}\DataTypeTok{sub=}\StringTok{""}\NormalTok{,}\DataTypeTok{cex=}\NormalTok{.}\DecValTok{9}\NormalTok{,  }\DataTypeTok{labels=}\OtherTok{FALSE}\NormalTok{)}
@@ -561,7 +676,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-11-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-13-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -571,7 +686,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-11-2.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-13-3.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -594,7 +709,7 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-13-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-15-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -655,11 +770,11 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \KeywordTok{plot}\NormalTok{(indexes_before, }\DataTypeTok{type =} \StringTok{"o"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{'Number of classes'}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{'Calinski index value'}
 \NormalTok{, }\DataTypeTok{main =} \StringTok{'Index before consolidation'}\NormalTok{, }\DataTypeTok{col =} \StringTok{'blue'}\NormalTok{, xaxt}
 \NormalTok{=}\StringTok{ "n"}\NormalTok{)}
-\KeywordTok{axis}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DataTypeTok{at=}\DecValTok{1}\OperatorTok{:}\DecValTok{9}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{6}\NormalTok{, }\DecValTok{7}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{9}\NormalTok{,}\DecValTok{10}\NormalTok{))  }
+\KeywordTok{axis}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DataTypeTok{at=}\DecValTok{1}\OperatorTok{:}\DecValTok{9}\NormalTok{, }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{6}\NormalTok{, }\DecValTok{7}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{9}\NormalTok{,}\DecValTok{10}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-16-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -671,53 +786,50 @@ oldpeak & slope & ca & thal & target\tabularnewline
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-17-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-19-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{first_factorial <-}\StringTok{ }\NormalTok{proj_indiv}
 \NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(first_factorial, }\DataTypeTok{Class =} \KeywordTok{as.factor}\NormalTok{(k_mean}\OperatorTok{$}\NormalTok{cluster))}
-\KeywordTok{catdes}\NormalTok{(df, }\DataTypeTok{num.var =} \KeywordTok{length}\NormalTok{(df), }\DataTypeTok{proba =} \FloatTok{0.05}\NormalTok{, }\DataTypeTok{row.w =} \OtherTok{NULL}\NormalTok{)}
+\NormalTok{df2 <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(k_mean}\OperatorTok{$}\NormalTok{cluster),heart_disease[,}\DecValTok{1}\OperatorTok{:}\DecValTok{13}\NormalTok{])}
+\NormalTok{catdes_k_means <-}\StringTok{ }\KeywordTok{catdes}\NormalTok{(df2, }\DataTypeTok{num.var =} \DecValTok{1}\NormalTok{, }\DataTypeTok{proba =} \FloatTok{0.05}\NormalTok{, }\DataTypeTok{row.w =} \OtherTok{NULL}\NormalTok{)}
+
+\NormalTok{catdes_k_means}\OperatorTok{$}\NormalTok{quanti}\OperatorTok{$}\StringTok{`}\DataTypeTok{1}\StringTok{`}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{,}\DecValTok{4}\NormalTok{]  }\CommentTok{#  p-values for cluster 1}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## 
-## Link between the cluster variable and the quantitative variables
-## ================================================================
-##            Eta2      P-value
-## Dim.1 0.6316289 8.766734e-66
-## Dim.2 0.5503737 8.467640e-53
-## 
-## Description of each cluster by quantitative variables
-## =====================================================
-## $`1`
-##           v.test Mean in category  Overall mean sd in category Overall sd
-## Dim.1   9.014585        1.0477037  2.852366e-15      0.8712730   1.344089
-## Dim.2 -10.516103       -0.9439256 -3.090499e-16      0.6923393   1.038050
-##            p.value
-## Dim.1 1.976176e-19
-## Dim.2 7.282354e-26
-## 
-## $`2`
-##          v.test Mean in category Overall mean sd in category Overall sd
-## Dim.1 -13.79634        -1.151379 2.852366e-15      0.7373691   1.344089
-##            p.value
-## Dim.1 2.681253e-43
-## 
-## $`3`
-##          v.test Mean in category  Overall mean sd in category Overall sd
-## Dim.2 10.780147        1.1748120 -3.090499e-16      0.7675912   1.038050
-## Dim.1  6.454662        0.9108084  2.852366e-15      0.8858076   1.344089
-##            p.value
-## Dim.2 4.272002e-27
-## Dim.1 1.084604e-10
+##    oldpeak        age      exang         ca        sex       chol 
+##  1.2264232  7.0074040  0.4997398  1.0078889  0.4249693 41.3369221
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ "Yes"}
-\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ "No"}
+\NormalTok{catdes_k_means}\OperatorTok{$}\NormalTok{quanti}\OperatorTok{$}\StringTok{`}\DataTypeTok{2}\StringTok{`}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{,}\DecValTok{4}\NormalTok{]  }\CommentTok{#  p-values for cluster 2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    thalach      slope    restecg         cp       thal         ca 
+## 14.0625861  0.5818251  0.4831867  0.9355780  0.5354285  0.9521994
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{catdes_k_means}\OperatorTok{$}\NormalTok{quanti}\OperatorTok{$}\StringTok{`}\DataTypeTok{3}\StringTok{`}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{,}\DecValTok{4}\NormalTok{]  }\CommentTok{#  p-values for cluster 3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       chol   trestbps        age        fbs    restecg        sex 
+## 54.9322793 18.6108154  6.6042040  0.4199125  0.5182388  0.4991830
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ "No"}
+\NormalTok{factor_heart}\OperatorTok{$}\NormalTok{disease[factor_heart}\OperatorTok{$}\NormalTok{target}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ "Yes"}
 \NormalTok{factor_heart}\OperatorTok{$}\NormalTok{target <-}\StringTok{ }\OtherTok{NULL}
 
 \NormalTok{factor_heart2 <-}\StringTok{ }\NormalTok{factor_heart}
@@ -753,17 +865,23 @@ oldpeak & slope & ca & thal & disease\tabularnewline
 \midrule
 \endhead
 Age\_{[}60,70) & 1 & 3 & thres\_{[}140,160) & Col\_{[}200,300) & 1 & 0 &
-thalach\_{[}150,170) & 0 & Oldp\_{[}2,3) & 0 & 0 & 1 & No\tabularnewline
+thalach\_{[}150,170) & 0 & Oldp\_{[}2,3) & 0 & 0 & 1 &
+Yes\tabularnewline
 Age\_{[}30,40) & 1 & 2 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 1 &
-thalach\_{[}170,190) & 0 & Oldp\_{[}3,4) & 0 & 0 & 2 & No\tabularnewline
+thalach\_{[}170,190) & 0 & Oldp\_{[}3,4) & 0 & 0 & 2 &
+Yes\tabularnewline
 Age\_{[}40,50) & 0 & 1 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 0 &
-thalach\_{[}170,190) & 0 & Oldp\_{[}1,2) & 2 & 0 & 2 & No\tabularnewline
+thalach\_{[}170,190) & 0 & Oldp\_{[}1,2) & 2 & 0 & 2 &
+Yes\tabularnewline
 Age\_{[}50,60) & 1 & 1 & thres\_{[}120,140) & Col\_{[}200,300) & 0 & 1 &
-thalach\_{[}170,190) & 0 & Oldp\_{[}0,1) & 2 & 0 & 2 & No\tabularnewline
+thalach\_{[}170,190) & 0 & Oldp\_{[}0,1) & 2 & 0 & 2 &
+Yes\tabularnewline
 Age\_{[}50,60) & 0 & 0 & thres\_{[}120,140) & Col\_{[}300,400) & 0 & 1 &
-thalach\_{[}150,170) & 1 & Oldp\_{[}0,1) & 2 & 0 & 2 & No\tabularnewline
+thalach\_{[}150,170) & 1 & Oldp\_{[}0,1) & 2 & 0 & 2 &
+Yes\tabularnewline
 Age\_{[}50,60) & 1 & 0 & thres\_{[}140,160) & Col\_{[}100,200) & 0 & 1 &
-thalach\_{[}130,150) & 0 & Oldp\_{[}0,1) & 1 & 0 & 1 & No\tabularnewline
+thalach\_{[}130,150) & 0 & Oldp\_{[}0,1) & 1 & 0 & 1 &
+Yes\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -901,25 +1019,602 @@ thalach\_{[}130,150) & 0 & Oldp\_{[}0,1) & 1 & 0 & 1 & No\tabularnewline
 ## 
 ## Supplementary categories
 ##                 Dim.1    cos2  v.test     Dim.2    cos2  v.test     Dim.3
-## No          |  -0.619   0.458 -11.767 |   0.142   0.024   2.694 |  -0.040
-## Yes         |   0.740   0.458  11.767 |  -0.170   0.024  -2.694 |   0.048
+## No          |   0.740   0.458  11.767 |  -0.170   0.024  -2.694 |   0.048
+## Yes         |  -0.619   0.458 -11.767 |   0.142   0.024   2.694 |  -0.040
 ##                cos2  v.test  
-## No            0.002  -0.766 |
-## Yes           0.002   0.766 |
+## No            0.002   0.766 |
+## Yes           0.002  -0.766 |
 ## 
 ## Supplementary categorical variables (eta2)
 ##               Dim.1 Dim.2 Dim.3  
 ## disease     | 0.458 0.024 0.002 |
 \end{verbatim}
 
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-20-1.pdf}
-
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-21-1.pdf}
-\includegraphics{project_report_files/figure-latex/unnamed-chunk-21-2.pdf}
-
 \includegraphics{project_report_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 \includegraphics{project_report_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-23-2.pdf}
+
+\begin{verbatim}
+## 
+## Attaching package: 'data.table'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:dplyr':
+## 
+##     between, first, last
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-27-1.pdf}
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-27-2.pdf}
+
+\begin{verbatim}
+## Warning: package 'plotrix' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'plotrix'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:gplots':
+## 
+##     plotCI
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in plot.xy(xy.coords(x, y), type = type, ...): "pos" is not a
+## graphical parameter
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-28-1.pdf}
+
+\begin{verbatim}
+## 
+## Link between the cluster variable and the categorical variables (chi-square test)
+## =================================================================================
+##               p.value df
+## thalach  1.932712e-47 12
+## oldpeak  7.962991e-23 12
+## slope    8.435305e-21  4
+## exang    6.027553e-20  2
+## age      8.573237e-20 10
+## cp       1.776157e-19  6
+## thal     1.421244e-16  6
+## ca       3.911596e-13  8
+## restecg  1.111592e-06  4
+## sex      4.784081e-06  2
+## chol     1.204882e-03  8
+## trestbps 5.918866e-03 12
+## 
+## Description of each cluster by the categories
+## =============================================
+## $`1`
+##                             Cla/Mod    Mod/Cla    Global      p.value
+## thalach=thalach_[150,170) 73.148148 71.1711712 35.643564 7.033818e-23
+## sex=0                     56.250000 48.6486486 31.683168 2.026298e-06
+## thal=2                    45.783133 68.4684685 54.785479 2.700666e-04
+## exang=0                   42.647059 78.3783784 67.326733 1.669393e-03
+## cp=2                      50.574713 39.6396396 28.712871 1.677088e-03
+## age=Age_[50,60)           46.400000 52.2522523 41.254125 3.389516e-03
+## restecg=0                 44.897959 59.4594595 48.514851 3.934508e-03
+## ca=3                      10.000000  1.8018018  6.600660 7.771682e-03
+## thal=3                    27.350427 28.8288288 38.613861 7.760270e-03
+## cp=0                      28.671329 36.9369369 47.194719 6.718614e-03
+## thal=1                     5.555556  0.9009009  5.940594 2.677075e-03
+## exang=1                   24.242424 21.6216216 32.673267 1.669393e-03
+## thalach=thalach_[110,130) 14.634146  5.4054054 13.531353 1.107965e-03
+## age=Age_[30,40)            0.000000  0.0000000  4.950495 8.652009e-04
+## thalach=thalach_[130,150) 19.178082 12.6126126 24.092409 2.786118e-04
+## chol=Col_[100,200)        12.000000  5.4054054 16.501650 3.168007e-05
+## thalach=thalach_[170,190) 13.793103  7.2072072 19.141914 2.790836e-05
+## oldpeak=Oldp_[2,3)         5.882353  1.8018018 11.221122 1.787026e-05
+## age=Age_[40,50)           15.277778  9.9099099 23.762376 7.998732e-06
+## sex=1                     27.536232 51.3513514 68.316832 2.026298e-06
+##                              v.test
+## thalach=thalach_[150,170)  9.847403
+## sex=0                      4.750784
+## thal=2                     3.642439
+## exang=0                    3.143502
+## cp=2                       3.142156
+## age=Age_[50,60)            2.930010
+## restecg=0                  2.883365
+## ca=3                      -2.661831
+## thal=3                    -2.662326
+## cp=0                      -2.710479
+## thal=1                    -3.002573
+## exang=1                   -3.143502
+## thalach=thalach_[110,130) -3.261571
+## age=Age_[30,40)           -3.331047
+## thalach=thalach_[130,150) -3.634415
+## chol=Col_[100,200)        -4.161041
+## thalach=thalach_[170,190) -4.189895
+## oldpeak=Oldp_[2,3)        -4.289963
+## age=Age_[40,50)           -4.465218
+## sex=1                     -4.750784
+## 
+## $`2`
+##                             Cla/Mod   Mod/Cla    Global      p.value
+## thalach=thalach_[170,190) 84.482759 55.056180 19.141914 7.495100e-23
+## oldpeak=Oldp_[0,1)        47.590361 88.764045 54.785479 1.094766e-15
+## age=Age_[40,50)           68.055556 55.056180 23.762376 2.364851e-15
+## slope=2                   50.000000 79.775281 46.864686 6.186719e-14
+## exang=0                   40.686275 93.258427 67.326733 2.355934e-11
+## ca=0                      43.428571 85.393258 57.755776 7.602943e-11
+## cp=1                      64.000000 35.955056 16.501650 2.619648e-08
+## thal=2                    41.566265 77.528090 54.785479 1.913940e-07
+## restecg=1                 42.763158 73.033708 50.165017 2.408284e-07
+## age=Age_[30,40)           86.666667 14.606742  4.950495 3.950633e-06
+## chol=Col_[100,200)        50.000000 28.089888 16.501650 8.135919e-04
+## trestbps=thres_[160,180)   4.761905  1.123596  6.930693 5.776580e-03
+## thalach=thalach_[90,110)   0.000000  0.000000  5.280528 3.227860e-03
+## thalach=thalach_[130,150) 15.068493 12.359551 24.092409 1.519712e-03
+## ca=2                       7.894737  3.370787 12.541254 8.782061e-04
+## thalach=thalach_[110,130)  4.878049  2.247191 13.531353 4.626749e-05
+## age=Age_[50,60)           16.800000 23.595506 41.254125 4.527240e-05
+## thal=3                    15.384615 20.224719 38.613861 1.533432e-05
+## oldpeak=Oldp_[2,3)         0.000000  0.000000 11.221122 3.143779e-06
+## restecg=0                 16.326531 26.966292 48.514851 1.105417e-06
+## oldpeak=Oldp_[1,2)         8.974359  7.865169 25.742574 1.064415e-06
+## ca=1                       6.153846  4.494382 21.452145 4.485823e-07
+## age=Age_[60,70)            5.000000  4.494382 26.402640 1.008709e-09
+## cp=0                      11.888112 19.101124 47.194719 1.103577e-10
+## exang=1                    6.060606  6.741573 32.673267 2.355934e-11
+## slope=1                   10.000000 15.730337 46.204620 1.543010e-12
+##                              v.test
+## thalach=thalach_[170,190)  9.841015
+## oldpeak=Oldp_[0,1)         8.015739
+## age=Age_[40,50)            7.920538
+## slope=2                    7.504068
+## exang=0                    6.682068
+## ca=0                       6.508254
+## cp=1                       5.565125
+## thal=2                     5.207508
+## restecg=1                  5.164697
+## age=Age_[30,40)            4.613963
+## chol=Col_[100,200)         3.348129
+## trestbps=thres_[160,180)  -2.760201
+## thalach=thalach_[90,110)  -2.945162
+## thalach=thalach_[130,150) -3.170893
+## ca=2                      -3.326891
+## thalach=thalach_[110,130) -4.073723
+## age=Age_[50,60)           -4.078781
+## thal=3                    -4.323830
+## oldpeak=Oldp_[2,3)        -4.661195
+## restecg=0                 -4.871879
+## oldpeak=Oldp_[1,2)        -4.879340
+## ca=1                      -5.047093
+## age=Age_[60,70)           -6.108026
+## cp=0                      -6.452036
+## exang=1                   -6.682068
+## slope=1                   -7.070568
+## 
+## $`3`
+##                             Cla/Mod    Mod/Cla    Global      p.value
+## exang=1                   69.696970 66.9902913 32.673267 1.396795e-19
+## cp=0                      59.440559 82.5242718 47.194719 1.744311e-19
+## slope=1                   57.142857 77.6699029 46.204620 1.533863e-15
+## oldpeak=Oldp_[2,3)        94.117647 31.0679612 11.221122 7.942302e-15
+## thal=3                    57.264957 65.0485437 38.613861 1.696461e-11
+## thalach=thalach_[110,130) 80.487805 32.0388350 13.531353 6.453248e-11
+## thalach=thalach_[130,150) 65.753425 46.6019417 24.092409 1.604492e-10
+## thalach=thalach_[90,110)  87.500000 13.5922330  5.280528 9.533717e-06
+## thal=1                    83.333333 14.5631068  5.940594 1.457395e-05
+## ca=3                      80.000000 15.5339806  6.600660 1.929255e-05
+## sex=1                     40.579710 81.5533981 68.316832 3.031969e-04
+## age=Age_[60,70)           47.500000 36.8932039 26.402640 3.615991e-03
+## ca=1                      49.230769 31.0679612 21.452145 4.356482e-03
+## slope=0                   61.904762 12.6213592  6.930693 7.929604e-03
+## trestbps=thres_[160,180)  61.904762 12.6213592  6.930693 7.929604e-03
+## oldpeak=Oldp_[3,4)        64.705882 10.6796117  5.610561 9.468838e-03
+## sex=0                     19.791667 18.4466019 31.683168 3.031969e-04
+## age=Age_[40,50)           16.666667 11.6504854 23.762376 2.527795e-04
+## cp=1                       4.000000  1.9417476 16.501650 5.344978e-08
+## cp=2                      10.344828  8.7378641 28.712871 5.914839e-09
+## ca=0                      19.428571 33.0097087 57.755776 4.518008e-10
+## thalach=thalach_[170,190)  1.724138  0.9708738 19.141914 5.236652e-11
+## thalach=thalach_[150,170)  5.555556  5.8252427 35.643564 5.686563e-17
+## thal=2                    12.650602 20.3883495 54.785479 2.036748e-18
+## exang=0                   16.666667 33.0097087 67.326733 1.396795e-19
+## oldpeak=Oldp_[0,1)        10.843373 17.4757282 54.785479 1.300306e-21
+## slope=2                    7.042254  9.7087379 46.864686 1.814133e-22
+##                              v.test
+## exang=1                    9.052541
+## cp=0                       9.028255
+## slope=1                    7.974188
+## oldpeak=Oldp_[2,3)         7.768497
+## thal=3                     6.730015
+## thalach=thalach_[110,130)  6.532844
+## thalach=thalach_[130,150)  6.395093
+## thalach=thalach_[90,110)   4.427487
+## thal=1                     4.335031
+## ca=3                       4.272925
+## sex=1                      3.612553
+## age=Age_[60,70)            2.909853
+## ca=1                       2.851125
+## slope=0                    2.655053
+## trestbps=thres_[160,180)   2.655053
+## oldpeak=Oldp_[3,4)         2.594646
+## sex=0                     -3.612553
+## age=Age_[40,50)           -3.659427
+## cp=1                      -5.439435
+## cp=2                      -5.819148
+## ca=0                      -6.234992
+## thalach=thalach_[170,190) -6.564047
+## thalach=thalach_[150,170) -8.371549
+## thal=2                    -8.755237
+## exang=0                   -9.052541
+## oldpeak=Oldp_[0,1)        -9.549733
+## slope=2                   -9.751695
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+& Cla/Mod & Mod/Cla & Global & p.value & v.test\tabularnewline
+\midrule
+\endhead
+thalach=thalach\_{[}150,170) & 73.148148 & 71.1711712 & 35.643564 &
+0.0000000 & 9.847403\tabularnewline
+sex=0 & 56.250000 & 48.6486486 & 31.683168 & 0.0000020 &
+4.750784\tabularnewline
+thal=2 & 45.783133 & 68.4684685 & 54.785479 & 0.0002701 &
+3.642439\tabularnewline
+exang=0 & 42.647059 & 78.3783784 & 67.326733 & 0.0016694 &
+3.143502\tabularnewline
+cp=2 & 50.574713 & 39.6396396 & 28.712871 & 0.0016771 &
+3.142156\tabularnewline
+age=Age\_{[}50,60) & 46.400000 & 52.2522523 & 41.254125 & 0.0033895 &
+2.930010\tabularnewline
+restecg=0 & 44.897959 & 59.4594595 & 48.514851 & 0.0039345 &
+2.883365\tabularnewline
+ca=3 & 10.000000 & 1.8018018 & 6.600660 & 0.0077717 &
+-2.661831\tabularnewline
+thal=3 & 27.350427 & 28.8288288 & 38.613861 & 0.0077603 &
+-2.662326\tabularnewline
+cp=0 & 28.671329 & 36.9369369 & 47.194719 & 0.0067186 &
+-2.710479\tabularnewline
+thal=1 & 5.555556 & 0.9009009 & 5.940594 & 0.0026771 &
+-3.002573\tabularnewline
+exang=1 & 24.242424 & 21.6216216 & 32.673267 & 0.0016694 &
+-3.143502\tabularnewline
+thalach=thalach\_{[}110,130) & 14.634146 & 5.4054054 & 13.531353 &
+0.0011080 & -3.261571\tabularnewline
+age=Age\_{[}30,40) & 0.000000 & 0.0000000 & 4.950495 & 0.0008652 &
+-3.331047\tabularnewline
+thalach=thalach\_{[}130,150) & 19.178082 & 12.6126126 & 24.092409 &
+0.0002786 & -3.634415\tabularnewline
+chol=Col\_{[}100,200) & 12.000000 & 5.4054054 & 16.501650 & 0.0000317 &
+-4.161041\tabularnewline
+thalach=thalach\_{[}170,190) & 13.793103 & 7.2072072 & 19.141914 &
+0.0000279 & -4.189895\tabularnewline
+oldpeak=Oldp\_{[}2,3) & 5.882353 & 1.8018018 & 11.221122 & 0.0000179 &
+-4.289963\tabularnewline
+age=Age\_{[}40,50) & 15.277778 & 9.9099099 & 23.762376 & 0.0000080 &
+-4.465218\tabularnewline
+sex=1 & 27.536232 & 51.3513514 & 68.316832 & 0.0000020 &
+-4.750784\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+& Cla/Mod & Mod/Cla & Global & p.value & v.test\tabularnewline
+\midrule
+\endhead
+thalach=thalach\_{[}170,190) & 84.482759 & 55.056180 & 19.141914 &
+0.0000000 & 9.841015\tabularnewline
+oldpeak=Oldp\_{[}0,1) & 47.590361 & 88.764045 & 54.785479 & 0.0000000 &
+8.015739\tabularnewline
+age=Age\_{[}40,50) & 68.055556 & 55.056180 & 23.762376 & 0.0000000 &
+7.920538\tabularnewline
+slope=2 & 50.000000 & 79.775281 & 46.864686 & 0.0000000 &
+7.504068\tabularnewline
+exang=0 & 40.686275 & 93.258427 & 67.326733 & 0.0000000 &
+6.682068\tabularnewline
+ca=0 & 43.428571 & 85.393258 & 57.755776 & 0.0000000 &
+6.508254\tabularnewline
+cp=1 & 64.000000 & 35.955056 & 16.501650 & 0.0000000 &
+5.565125\tabularnewline
+thal=2 & 41.566265 & 77.528090 & 54.785479 & 0.0000002 &
+5.207508\tabularnewline
+restecg=1 & 42.763158 & 73.033708 & 50.165017 & 0.0000002 &
+5.164697\tabularnewline
+age=Age\_{[}30,40) & 86.666667 & 14.606742 & 4.950495 & 0.0000040 &
+4.613963\tabularnewline
+chol=Col\_{[}100,200) & 50.000000 & 28.089888 & 16.501650 & 0.0008136 &
+3.348129\tabularnewline
+trestbps=thres\_{[}160,180) & 4.761905 & 1.123595 & 6.930693 & 0.0057766
+& -2.760201\tabularnewline
+thalach=thalach\_{[}90,110) & 0.000000 & 0.000000 & 5.280528 & 0.0032279
+& -2.945162\tabularnewline
+thalach=thalach\_{[}130,150) & 15.068493 & 12.359551 & 24.092409 &
+0.0015197 & -3.170893\tabularnewline
+ca=2 & 7.894737 & 3.370786 & 12.541254 & 0.0008782 &
+-3.326891\tabularnewline
+thalach=thalach\_{[}110,130) & 4.878049 & 2.247191 & 13.531353 &
+0.0000463 & -4.073723\tabularnewline
+age=Age\_{[}50,60) & 16.800000 & 23.595506 & 41.254125 & 0.0000453 &
+-4.078781\tabularnewline
+thal=3 & 15.384615 & 20.224719 & 38.613861 & 0.0000153 &
+-4.323830\tabularnewline
+oldpeak=Oldp\_{[}2,3) & 0.000000 & 0.000000 & 11.221122 & 0.0000031 &
+-4.661195\tabularnewline
+restecg=0 & 16.326531 & 26.966292 & 48.514851 & 0.0000011 &
+-4.871879\tabularnewline
+oldpeak=Oldp\_{[}1,2) & 8.974359 & 7.865169 & 25.742574 & 0.0000011 &
+-4.879340\tabularnewline
+ca=1 & 6.153846 & 4.494382 & 21.452145 & 0.0000004 &
+-5.047093\tabularnewline
+age=Age\_{[}60,70) & 5.000000 & 4.494382 & 26.402640 & 0.0000000 &
+-6.108026\tabularnewline
+cp=0 & 11.888112 & 19.101124 & 47.194719 & 0.0000000 &
+-6.452036\tabularnewline
+exang=1 & 6.060606 & 6.741573 & 32.673267 & 0.0000000 &
+-6.682068\tabularnewline
+slope=1 & 10.000000 & 15.730337 & 46.204620 & 0.0000000 &
+-7.070568\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+& Cla/Mod & Mod/Cla & Global & p.value & v.test\tabularnewline
+\midrule
+\endhead
+exang=1 & 69.696970 & 66.9902913 & 32.673267 & 0.0000000 &
+9.052541\tabularnewline
+cp=0 & 59.440559 & 82.5242718 & 47.194719 & 0.0000000 &
+9.028255\tabularnewline
+slope=1 & 57.142857 & 77.6699029 & 46.204620 & 0.0000000 &
+7.974188\tabularnewline
+oldpeak=Oldp\_{[}2,3) & 94.117647 & 31.0679612 & 11.221122 & 0.0000000 &
+7.768497\tabularnewline
+thal=3 & 57.264957 & 65.0485437 & 38.613861 & 0.0000000 &
+6.730015\tabularnewline
+thalach=thalach\_{[}110,130) & 80.487805 & 32.0388350 & 13.531353 &
+0.0000000 & 6.532844\tabularnewline
+thalach=thalach\_{[}130,150) & 65.753425 & 46.6019417 & 24.092409 &
+0.0000000 & 6.395093\tabularnewline
+thalach=thalach\_{[}90,110) & 87.500000 & 13.5922330 & 5.280528 &
+0.0000095 & 4.427487\tabularnewline
+thal=1 & 83.333333 & 14.5631068 & 5.940594 & 0.0000146 &
+4.335031\tabularnewline
+ca=3 & 80.000000 & 15.5339806 & 6.600660 & 0.0000193 &
+4.272925\tabularnewline
+sex=1 & 40.579710 & 81.5533981 & 68.316832 & 0.0003032 &
+3.612553\tabularnewline
+age=Age\_{[}60,70) & 47.500000 & 36.8932039 & 26.402640 & 0.0036160 &
+2.909853\tabularnewline
+ca=1 & 49.230769 & 31.0679612 & 21.452145 & 0.0043565 &
+2.851125\tabularnewline
+slope=0 & 61.904762 & 12.6213592 & 6.930693 & 0.0079296 &
+2.655053\tabularnewline
+trestbps=thres\_{[}160,180) & 61.904762 & 12.6213592 & 6.930693 &
+0.0079296 & 2.655053\tabularnewline
+oldpeak=Oldp\_{[}3,4) & 64.705882 & 10.6796117 & 5.610561 & 0.0094688 &
+2.594646\tabularnewline
+sex=0 & 19.791667 & 18.4466019 & 31.683168 & 0.0003032 &
+-3.612553\tabularnewline
+age=Age\_{[}40,50) & 16.666667 & 11.6504854 & 23.762376 & 0.0002528 &
+-3.659427\tabularnewline
+cp=1 & 4.000000 & 1.9417476 & 16.501650 & 0.0000001 &
+-5.439435\tabularnewline
+cp=2 & 10.344828 & 8.7378641 & 28.712871 & 0.0000000 &
+-5.819148\tabularnewline
+ca=0 & 19.428571 & 33.0097087 & 57.755776 & 0.0000000 &
+-6.234992\tabularnewline
+thalach=thalach\_{[}170,190) & 1.724138 & 0.9708738 & 19.141914 &
+0.0000000 & -6.564048\tabularnewline
+thalach=thalach\_{[}150,170) & 5.555556 & 5.8252427 & 35.643564 &
+0.0000000 & -8.371549\tabularnewline
+thal=2 & 12.650602 & 20.3883495 & 54.785479 & 0.0000000 &
+-8.755237\tabularnewline
+exang=0 & 16.666667 & 33.0097087 & 67.326733 & 0.0000000 &
+-9.052541\tabularnewline
+oldpeak=Oldp\_{[}0,1) & 10.843374 & 17.4757282 & 54.785479 & 0.0000000 &
+-9.549733\tabularnewline
+slope=2 & 7.042254 & 9.7087379 & 46.864686 & 0.0000000 &
+-9.751695\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+## Loading required package: caTools
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-30-1.pdf}
+
+\begin{verbatim}
+## 
+## Classification tree:
+## rpart(formula = disease ~ ., data = train, control = rpart.control(cp = 0.001, 
+##     xval = 10))
+## 
+## Variables actually used in tree construction:
+## [1] ca       cp       slope    thalach  trestbps
+## 
+## Root node error: 89/194 = 0.45876
+## 
+## n= 194 
+## 
+##         CP nsplit rel error  xerror     xstd
+## 1 0.471910      0   1.00000 1.00000 0.077983
+## 2 0.067416      1   0.52809 0.74157 0.074146
+## 3 0.056180      3   0.39326 0.60674 0.070141
+## 4 0.044944      5   0.28090 0.59551 0.069736
+## 5 0.001000      6   0.23596 0.51685 0.066561
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-31-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-32-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-33-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-34-1.pdf}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-35-1.pdf}
+
+\begin{longtable}[]{@{}r@{}}
+\toprule
+AUC.value\tabularnewline
+\midrule
+\endhead
+0.7943878\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{test}\OperatorTok{$}\NormalTok{type <-}\StringTok{ 'test'}
+\NormalTok{train}\OperatorTok{$}\NormalTok{type <-}\StringTok{ 'train'}
+\NormalTok{test_train <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(test,train)}
+\KeywordTok{library}\NormalTok{(cowplot)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'cowplot'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:ggplot2':
+## 
+##     ggsave
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g0 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ thalach, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'PIE'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'contexts'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g7 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ age, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Years'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Age'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g8 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ thalach, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'Heart Rate BPM'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Thalach'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g9 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ oldpeak, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'ST Depression (mV)'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Oldpeak'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g10 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ chol, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'mg/dl'}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Chol'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g11 <-}\StringTok{ }\NormalTok{test_train[test_train}\OperatorTok{$}\NormalTok{type}\OperatorTok{==}\KeywordTok{c}\NormalTok{(}\StringTok{'test'}\NormalTok{,}\StringTok{'train'}\NormalTok{),] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ trestbps, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_density(alpha = 0.5) + }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{'mm/Hg '}\NormalTok{, }\DataTypeTok{title =} \StringTok{'Trestbps'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in test_train$type == c("test", "train"): longer object length is
+## not a multiple of shorter object length
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{legend <-}\StringTok{ }\KeywordTok{get_legend}\NormalTok{(g0 }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.8}\NormalTok{, }\FloatTok{0.6}\NormalTok{)) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.box =} \StringTok{"horizontal"}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.text=}\KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{20}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{grid.arrange}\NormalTok{(g7, g8, g9, g10, g11, legend,}\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{project_report_files/figure-latex/unnamed-chunk-38-1.pdf}
 
 
 \end{document}

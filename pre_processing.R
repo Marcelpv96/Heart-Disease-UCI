@@ -71,10 +71,31 @@ plot(mout$md,mout$rd,xlab='Classical Mahalanobis distance',ylab='Robust Mahalano
 abline(h = mout$cutoff, col="red")  # add cutoff line
 abline(v = mout$cutoff, col="red")  # add cutoff line
 
+#sort(round(mout$rd[mout$rd >= mout$cutoff],3),decreasing=T)
+
+MRD_index_ordered <- order(mout$rd, decreasing=T)
+MRD_index_ordered
+round(mout$rd[MRD_index_ordered][1:5],3)
+
+MRD_plot <- plot(mout$rd, 
+                 pch="o", 
+                 cex=1, 
+                 main="Potential MRD outliers\n by Mahalanobis robust distance (MRD)",
+                 ylab="MRD Rank")
 #Local Outlier Factor
 outlier.scores <- lofactor(heart_disease[,-14], k=5)
+outlier.scores <- lofactor(pca_facto, k=5)
 plot(density(outlier.scores),main='Distribution of individuals local outlier factor scores')
 
+LOF_plot <- plot(outlier.scores, 
+                 pch="o", 
+                 cex=1, 
+                 main="Potential LOF outliers\n by local outliers factor analysis (LOF-k=5)",
+                 ylab="LOF Rank")
+#LOF_plot_cutoff <- 0.5*(LOF_df[LOF_index_ordered[4],]$LOF_rank + LOF_df[LOF_index_ordered[5],]$LOF_rank)
+abline(h = 1, col="red")  # add cutoff line
+
+sort(outlier.scores, decreasing = TRUE)[1:4]
 
 #Exploratory Data Analysis
 #Density of heart presence/absence disease by age
