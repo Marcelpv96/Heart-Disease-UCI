@@ -40,7 +40,6 @@ library(randomForest)
 library(expm)
 library(adegraphics)
 library(fpc)
-
 theme_set(theme_bw())
 setwd("/Users/JaviFerrando/Desktop/MVA-Project")
 
@@ -52,11 +51,24 @@ columns <- colnames(heart_disease)
 columns[1] <- "age"
 colnames(heart_disease) <- columns
 
+insert_nas <- function(x) {
+  len <- length(x)
+  n <- sample(1:floor(0.05*len), 1)
+  i <- sample(1:len, n)
+  x[i] <- NA 
+  x
+}
+
+heart_disease_missing <- sapply(heart_disease, insert_nas)
+kable(head(heart_disease_missing))
+knn_data <- knnImputation(heart_disease_missing, k = 1, scale = T)
+kable(head(knn_data))
+
 # Find missing variables
 which(is.na(heart_disease))
 
-kable(head(heart_disease))
-describe(heart_disease)
+#kable(head(heart_disease))
+#describe(heart_disease)
 
 ```
 
@@ -127,6 +139,7 @@ g4 <- ggplot(data=heart_disease, aes(x=cp, fill=as.factor(target)))+
   scale_fill_manual(values = c('skyblue4', 'skyblue2'),name = "Disease", labels = c("No", "Yes"))
 
 grid.arrange(g1, g2, g3, g4, ncol = 2)
+grid.arrange(g2)
 ```
 ```{r}
 g5 <- ggplot(data=heart_disease, aes(x=oldpeak, fill=as.factor(target)))+
