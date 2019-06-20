@@ -1,33 +1,15 @@
-# MVA-Project
+# Heart Disease UCI - Data Analysis
 
-Final Multivariate Analysis project.
+This project is an exhaustive analysis of : https://archive.ics.uci.edu/ml/datasets/Heart+Disease, with R language.
 
-The student must perform a multivariate approach of the data matrix
-(visualization, clustering and interpretation) plus a prediction model
-suitable for the undertaken problem. The student must write a complete
-report upon the solution envisaged.
+In **report.pdf** file there are all the information and conclusions of the analysis, and all source code is in Pre-processing.R file and project_report.Rmd.
 
-  1- A description of the problem and available data
-  
-  2- The pre-process of data
-  
-  3- The protocol of validation
-  
-  4- The visualisation performed
-  
-  5- The interpretation of the latent concepts
-  
-  6- The clustering performed
-  
-  7- The interpretation of the found clusters
-  
-  8- Discussion about the differences of the test sample respect to the
-  training one
-  
-  9- The prediction model with its best parameterization and its
-  generalization error
-  
-  10- Scientific and personal conclusions
+The content of **report.pdf** is:
+  - Data description and pre-processing.
+  - Exploratory Data Analysis, PCA and MCA.
+  - All procedure to perform an Hierarchical Clustering and consolidate using K-Means and also the interpretation.
+  - Predictive model, a decision tree that then has been improved with apply random forest.
+
 
 
 
